@@ -1,0 +1,21 @@
+{
+  "name": "jaskolek/pdf-editor",
+  "description": "library for editing PDF files. Includes compression and text extraction",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "jaskolek",
+      "email": "jaskolek@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "PdfEditor\\": "src/"
+    }
+  },
+  "require": {
+    "ext-zlib": "*",
+    "ext-gd": "*"
+  }
+}
