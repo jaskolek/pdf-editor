@@ -62,7 +62,7 @@ class TextEncoderFactory
     public function fromPdfFontObject(PdfDocument $pdf, FontPdfObject $pdfFontObject)
     {
         $header = $pdfFontObject->getHeader();
-        if (preg_match('@/Encoding/Identity-H/ToUnicode\s+(\d+)\s+(\d+)\s+R@', $header, $matches)) {
+        if (preg_match('@/ToUnicode\s+(\d+)\s+(\d+)\s+R@', $header, $matches)) {
             return $this->identityHFromToUnicodeMapObject($pdf->getObjectById($matches[1]));
         }
 
