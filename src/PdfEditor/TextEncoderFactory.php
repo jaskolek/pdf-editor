@@ -11,8 +11,8 @@ namespace PdfEditor;
 
 use PdfEditor\PdfObject\FontPdfObject;
 use PdfEditor\PdfObject\PdfObjectInterface;
+use PdfEditor\TextDecoder\MultiByteCharacterMapTextDecoder;
 use PdfEditor\TextDecoder\DummyTextDecoder;
-use PdfEditor\TextDecoder\IdentityHTextDecoder;
 
 /**
  * Class TextEncoderFactory
@@ -31,7 +31,7 @@ class TextEncoderFactory
      */
     public function __construct(PdfObjectManipulator $pdfObjectManipulator = null)
     {
-        $this->pdfObjectManipulator = $pdfObjectManipulator??$this->getDefaultPdfObjectManipulator();
+        $this->pdfObjectManipulator = $pdfObjectManipulator ?? $this->getDefaultPdfObjectManipulator();
     }
 
     /**
@@ -45,7 +45,7 @@ class TextEncoderFactory
     /**
      * @param PdfDocument $pdf
      * @param $fontObjectId
-     * @return DummyTextDecoder|IdentityHTextDecoder
+     * @return DummyTextDecoder|MultiByteCharacterMapTextDecoder
      */
     public function fromPdfFontObjectId(PdfDocument $pdf, $fontObjectId)
     {
@@ -57,43 +57,68 @@ class TextEncoderFactory
     /**
      * @param PdfDocument $pdf
      * @param FontPdfObject $pdfFontObject
-     * @return DummyTextDecoder|IdentityHTextDecoder
+     * @return DummyTextDecoder|MultiByteCharacterMapTextDecoder
      */
     public function fromPdfFontObject(PdfDocument $pdf, FontPdfObject $pdfFontObject)
     {
         $header = $pdfFontObject->getHeader();
-        if(preg_match('@/Encoding/Identity-H/ToUnicode\s+(\d+)\s+(\d+)\s+R@', $header, $matches)){
+        if (preg_match('@/Encoding/Identity-H/ToUnicode\s+(\d+)\s+(\d+)\s+R@', $header, $matches)) {
             return $this->identityHFromToUnicodeMapObject($pdf->getObjectById($matches[1]));
         }
+
+        if (preg_match('@/Encoding\s+(\d+)\s+(\d+)\s+R@', $header, $matches)) {
+            return $this->fromDifferencesObject($pdf->getObjectById($matches[1]));
+        }
+
         return new DummyTextDecoder();
     }
 
+    /**
+     * @param PdfObjectInterface $pdfObject
+     * @return MultiByteCharacterMapTextDecoder
+     */
+    public function fromDifferencesObject(PdfObjectInterface $pdfObject): MultiByteCharacterMapTextDecoder
+    {
+        preg_match('@\[(.*?)\]@s', $pdfObject->getHeader(), $match);
+
+        $groupList = explode(' ', $match[1]);
+        $decCharacterMap = [];
+        foreach ($groupList as $group) {
+            $characterList = explode('/', $group);
+            $start = (int)array_shift($characterList);
+            foreach ($characterList as $key => $character) {
+                $decCharacterMap[$key + $start] = (int)$character;
+            }
+        }
+
+        return new MultiByteCharacterMapTextDecoder($decCharacterMap, 1);
+    }
 
     /**
      * @param PdfObjectInterface $pdfObject
-     * @return IdentityHTextDecoder
+     * @return MultiByteCharacterMapTextDecoder
      */
-    public function identityHFromToUnicodeMapObject(PdfObjectInterface $pdfObject): IdentityHTextDecoder
+    public function identityHFromToUnicodeMapObject(PdfObjectInterface $pdfObject): MultiByteCharacterMapTextDecoder
     {
         $text = $this->pdfObjectManipulator->getDecodedStream($pdfObject);
 
         $decCharacterMap = [];
         preg_match_all('@<([0-9A-F]+)>\s+<([0-9A-F]+)>\s+\[(.*?)\]@is', $text, $matches, PREG_SET_ORDER);
 
-        foreach($matches as [, $start, $end, $valueListString]){
+        foreach ($matches as [, $start, $end, $valueListString]) {
             $valueListString = trim(preg_replace('@\s+@', ' ', $valueListString));
             $valueList = explode(' ', $valueListString);
-            $decValueList = array_map(function($value){
+            $decValueList = array_map(function ($value) {
                 return hexdec(substr($value, 1, -1));
             }, $valueList);
 
             $decStart = hexdec($start);
 
-            foreach($decValueList as $key => $decValue){
+            foreach ($decValueList as $key => $decValue) {
                 $decCharacterMap[$decStart + $key] = $decValue;
             }
         }
 
-        return new IdentityHTextDecoder($decCharacterMap);
+        return new MultiByteCharacterMapTextDecoder($decCharacterMap);
     }
 }

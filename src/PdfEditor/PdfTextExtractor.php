@@ -82,7 +82,8 @@ class PdfTextExtractor
     {
         $pdf = new PdfDocument(file_get_contents($path));
         $textObjectList = [];
-        foreach ($pdf->getObjectList() as $objectId => $pdfObject) {
+        $objectList = $pdf->getObjectList();
+        foreach ($objectList as $objectId => $pdfObject) {
             if (!($pdfObject instanceof ImagePdfObject)) {
                 $newTextObjectList = $this->extractTextFromPdfObject($pdf, $pdfObject);
                 foreach ($newTextObjectList as $newTextObject) {
@@ -128,6 +129,7 @@ class PdfTextExtractor
         $textObjectList = [];
         try {
             $stream = $this->getDefaultPdfObjectManipulator()->getDecodedStream($pdfObject);
+
             preg_match_all('@BT(.*?)ET@s', $stream, $matches, PREG_SET_ORDER);
         }catch (\Exception $exception){
             return [];

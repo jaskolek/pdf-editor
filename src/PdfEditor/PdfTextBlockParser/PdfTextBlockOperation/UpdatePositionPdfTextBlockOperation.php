@@ -30,9 +30,9 @@ class UpdatePositionPdfTextBlockOperation implements PdfTextBlockOperationInterf
     /**
      * @param TextObjectOptions $options
      * @param string $parametersString
-     * @return null|EncodedTextObject
+     * @return EncodedTextObject[]
      */
-    public function performOperation(TextObjectOptions $options, string $parametersString): ?EncodedTextObject
+    public function performOperation(TextObjectOptions $options, string $parametersString): array
     {
         preg_match($this->getSearchPattern(), $parametersString, $matches);
         [, $x, $y] = $matches;
@@ -40,6 +40,6 @@ class UpdatePositionPdfTextBlockOperation implements PdfTextBlockOperationInterf
         $options->x += (float)$x;
         $options->y += (float)$y;
 
-        return null;
+        return [];
     }
 }

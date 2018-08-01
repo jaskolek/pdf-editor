@@ -55,6 +55,9 @@ class FordComWindowStickerPdfDocumentCompressor implements PdfDocumentCompressor
             if (preg_match('@^<</N 4/Filter/FlateDecode/Length \d+>>$@', $header) || false !== strpos($header, 'FORD_WDWL_Blocker')) {
                 $toDeleteIdList[] = $objectId;
             }
+            if(false !== strpos($header, '/Type/Metadata')){
+                $toDeleteIdList[] = $objectId;
+            }
         }
         foreach ($toDeleteIdList as $toDeleteId) {
             $pdfDocument->deleteObject($toDeleteId);

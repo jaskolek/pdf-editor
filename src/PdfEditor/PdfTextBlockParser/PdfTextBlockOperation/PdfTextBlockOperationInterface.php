@@ -26,7 +26,7 @@ interface PdfTextBlockOperationInterface
     /**
      * @param TextObjectOptions $options
      * @param string $parametersString
-     * @return null|EncodedTextObject
+     * @return EncodedTextObject[]
      */
-    public function performOperation(TextObjectOptions $options, string $parametersString): ?EncodedTextObject;
+    public function performOperation(TextObjectOptions $options, string $parametersString): array;
 }

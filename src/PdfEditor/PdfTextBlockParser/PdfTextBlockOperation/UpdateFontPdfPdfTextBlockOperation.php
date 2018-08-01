@@ -22,15 +22,15 @@ class UpdateFontPdfPdfTextBlockOperation implements PdfTextBlockOperationInterfa
     /**
      * @param TextObjectOptions $options
      * @param string $parametersString
-     * @return null|EncodedTextObject
+     * @return EncodedTextObject[]
      */
-    public function performOperation(TextObjectOptions $options, string $parametersString):?EncodedTextObject
+    public function performOperation(TextObjectOptions $options, string $parametersString):array
     {
         preg_match($this->getSearchPattern(), $parametersString, $matches);
         $options->fontId = $matches[1];
         $options->fontSize = $matches[2];
 
-        return null;
+        return [];
     }
 
     /**

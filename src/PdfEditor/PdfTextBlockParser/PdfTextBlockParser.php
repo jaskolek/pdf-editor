@@ -9,10 +9,11 @@
 namespace PdfEditor\PdfTextBlockParser;
 
 
+use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\DisplayTextArrayPdfTextBlockOperation;
 use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\DisplayTextPdfTextBlockOperation;
+use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\PdfTextBlockOperationInterface;
 use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\UpdateFontPdfPdfTextBlockOperation;
 use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\UpdatePositionPdfTextBlockOperation;
-use PdfEditor\PdfTextBlockParser\PdfTextBlockOperation\PdfTextBlockOperationInterface;
 
 /**
  * Class PdfTextBlockParser
@@ -33,17 +34,18 @@ class PdfTextBlockParser
         $pdfTextBlockOperationList = [
             new UpdateFontPdfPdfTextBlockOperation(),
             new UpdatePositionPdfTextBlockOperation(),
-            new DisplayTextPdfTextBlockOperation()
+            new DisplayTextPdfTextBlockOperation(),
+            new DisplayTextArrayPdfTextBlockOperation()
         ];
 
         /** @var array $operationList */
         $operationList = [];
 
-        foreach($pdfTextBlockOperationList as $pdfTextBlockOperation){
+        foreach ($pdfTextBlockOperationList as $pdfTextBlockOperation) {
             $pattern = $pdfTextBlockOperation->getSearchPattern();
             preg_match_all($pattern, $textBlock, $matches, PREG_OFFSET_CAPTURE);
 
-            foreach($matches[0] as $match){
+            foreach ($matches[0] as $match) {
                 $operationList[$match[1]] = [$pdfTextBlockOperation, $match[0]];
             }
         }
@@ -58,9 +60,9 @@ class PdfTextBlockParser
          * @var PdfTextBlockOperationInterface $operation
          * @var string $parametersString
          */
-        foreach($operationList as $key => [$operation, $parametersString]){
-            $newTextObject = $operation->performOperation($textObjectOptions, $parametersString);
-            if($newTextObject !== null){
+        foreach ($operationList as $key => [$operation, $parametersString]) {
+            $newTextObjectList = $operation->performOperation($textObjectOptions, $parametersString);
+            foreach ($newTextObjectList as $newTextObject) {
                 $textObjectList[] = $newTextObject;
             }
         }

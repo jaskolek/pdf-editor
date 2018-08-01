@@ -13,20 +13,24 @@ namespace PdfEditor\TextDecoder;
  * Class IdentityHTextDecoder
  * @package PdfEditor\TextDecoder
  */
-class IdentityHTextDecoder implements TextDecoderInterface
+class MultiByteCharacterMapTextDecoder implements TextDecoderInterface
 {
     /**
      * @var
      */
     protected $decCharacterMap;
 
+    protected $bytes;
+
     /**
      * IdentityHTextEncoder constructor.
      * @param $decCharacterMap
+     * @param int $bytes
      */
-    public function __construct($decCharacterMap)
+    public function __construct($decCharacterMap, $bytes = 2)
     {
         $this->decCharacterMap = $decCharacterMap;
+        $this->bytes = $bytes;
     }
 
 
@@ -49,16 +53,25 @@ class IdentityHTextDecoder implements TextDecoderInterface
         ];
         $string = str_replace(array_keys($specialCharacterList), array_values($specialCharacterList), $string);
 
+        //???? Why -2? It works this way but I don't know why
+        $string = preg_replace_callback("@\\\\0(\d+)@", function($matches){
+            return \chr(((int) $matches[1]) - 2);
+        }, $string);
         $length = \strlen($string);
         $index = 0;
 
         while ($index < $length) {
 
-            $mapIndex = \ord($string[$index] ?? 0) * 256 + \ord($string[$index + 1] ?? 0);
+            $mapIndex = 0;
+            for ($i = 0; $i < $this->bytes; ++$i) {
+                $mapIndex += \ord($string[$index + $i] ?? 0) * (256 ** ($this->bytes - 1 - $i));
+            }
+
+//            $mapIndex = \ord($string[$index] ?? 0) * 256 + \ord($string[$index + 1] ?? 0);
             if (isset($this->decCharacterMap[$mapIndex])) {
                 $numValue = $this->decCharacterMap[$mapIndex];
                 $output .= \chr($numValue);
-                $index += 2;
+                $index += $this->bytes;
             } else {
                 $output .= $string[$index];
                 $index++;
