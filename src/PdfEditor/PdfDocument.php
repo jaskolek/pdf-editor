@@ -111,9 +111,9 @@ class PdfDocument
         //depending on header, set different object
         if (strpos($header, '/Subtype/Image') !== false) {
             $object = new ImagePdfObject($objectString);
-        } else if(strpos($header, '<</Type/Font') !== false){
+        } else if(strpos($header, '/Type/Font') !== false){
             $object = new FontPdfObject($objectString);
-        } else if(strpos($header, '<</Type/XObject/Subtype/Form') !== false){
+        } else if(strpos($header, '/Type/XObject/Subtype/Form') !== false){
             $object = new FormPdfObject($objectString);
         }else {
             $object = new UnknownPdfObject($objectString);
