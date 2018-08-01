@@ -29,7 +29,7 @@ class PdfDocument
     /**
      * @var
      */
-    protected $objectList;
+    protected $objectList = [];
 
 
 
@@ -89,6 +89,9 @@ class PdfDocument
      */
     public function getObjectById($objectId): PdfObjectInterface
     {
+        if(!isset($this->objectList[$objectId])){
+            throw new \InvalidArgumentException('Can not find object with id ' . $objectId);
+        }
         return $this->objectList[$objectId];
     }
 
