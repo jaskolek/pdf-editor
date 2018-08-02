@@ -76,22 +76,20 @@ class PdfTextExtractor
 
     /**
      * @param $path
-     * @return DecodedTextObject[]
+     * @return DecodedTextObject[][]
      */
     public function extractTextFromFile($path): array
     {
         $pdf = new PdfDocument(file_get_contents($path));
-        $textObjectList = [];
+        $textObjectGroupList = [];
         $objectList = $pdf->getObjectList();
         foreach ($objectList as $objectId => $pdfObject) {
+            $textObjectGroupList[$objectId] = [];
             if (!($pdfObject instanceof ImagePdfObject)) {
-                $newTextObjectList = $this->extractTextFromPdfObject($pdf, $pdfObject);
-                foreach ($newTextObjectList as $newTextObject) {
-                    $textObjectList[] = $newTextObject;
-                }
+                $textObjectGroupList[$objectId][] = $this->extractTextFromPdfObject($pdf, $pdfObject);
             }
         }
-        return $textObjectList;
+        return $textObjectGroupList;
     }
 
     /**
