@@ -47,7 +47,18 @@ class FordComWindowStickerPdfDocumentCompressor implements PdfDocumentCompressor
      */
     public function compressFile($inputPath, $outputPath): void
     {
-        $pdfDocument = new PdfDocument(file_get_contents($inputPath));
+        $content = file_get_contents($inputPath);
+        $compressedContent = $this->compressContent($content);
+        file_put_contents($outputPath, $compressedContent);
+    }
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function compressContent($content): string
+    {
+        $pdfDocument = new PdfDocument($content);
         //delete objects by header
         $toDeleteIdList = [];
         foreach ($pdfDocument->getObjectList() as $objectId => $object) {
@@ -64,6 +75,6 @@ class FordComWindowStickerPdfDocumentCompressor implements PdfDocumentCompressor
         }
 
         $pdfDocument = $this->pdfImageCompressor->compressPdfDocument($pdfDocument);
-        file_put_contents($outputPath, $pdfDocument->getSource());
+        return $pdfDocument->getSource();
     }
 }

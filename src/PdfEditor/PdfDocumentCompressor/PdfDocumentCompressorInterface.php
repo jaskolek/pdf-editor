@@ -21,4 +21,10 @@ interface PdfDocumentCompressorInterface
      * @return void
      */
     public function compressFile($inputPath, $outputPath): void;
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function compressContent($content): string;
 }
