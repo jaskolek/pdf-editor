@@ -86,7 +86,7 @@ class PdfTextExtractor
         foreach ($objectList as $objectId => $pdfObject) {
             $textObjectGroupList[$objectId] = [];
             if (!($pdfObject instanceof ImagePdfObject)) {
-                $textObjectGroupList[$objectId][] = $this->extractTextFromPdfObject($pdf, $pdfObject);
+                $textObjectGroupList[$objectId] = $this->extractTextFromPdfObject($pdf, $pdfObject);
             }
         }
         return $textObjectGroupList;
