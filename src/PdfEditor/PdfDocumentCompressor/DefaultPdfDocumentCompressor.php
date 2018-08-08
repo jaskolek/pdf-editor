@@ -22,7 +22,7 @@ class DefaultPdfDocumentCompressor implements PdfDocumentCompressorInterface
     protected $pdfImageCompressor;
 
     /**
-     * FordComWindowStickerPdfDocumentCompressor constructor.
+     * DefaultPdfDocumentCompressor constructor.
      * @param PdfImageCompressor|null $pdfImageCompressor
      */
     public function __construct(PdfImageCompressor $pdfImageCompressor = null)
